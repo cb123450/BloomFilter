@@ -9,7 +9,8 @@ class BloomFilter{
   int arr[];
   int m;
   int k;
-  hash<T*> hash_fxns;
+  hash<T> hash_fxn;
+  int shifts[];
 
  public:
   BloomFilter(int m, int k);
@@ -17,6 +18,8 @@ class BloomFilter{
   bool insert(T obj);
   bool query(T obj);
 
-  void createHashFxns();
+  //void createHashFxns();
   
-}
+};
+
+#include "BloomFilter.cpp"

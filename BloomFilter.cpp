@@ -1,25 +1,25 @@
 #include "BloomFilter.h"
 
-BloomFilter<T>(int m, int k){
+template <typename T>
+BloomFilter<T>::BloomFilter(int m, int k){
   this.m = m;
-  this.arr = new int[m];
   this.k = k;
+  
+  this.arr = new int[m];
+  this.shifts = new int[k];
 
 }
 
-bool insert(T obj){
+template <typename T>
+bool BloomFilter<T>::insert(T obj){
   return true;
 }
 
-bool query(T obj){
+template <typename T>
+bool BloomFilter<T>::query(T obj){
   return true;
-}
-
-void createHashFxns(){
-  hash<T*> orig_hash;
-  hash_fxns[0] = orig_hash;  
 }
 
 int main(){
-  //BloomFilter b = newBloomFilter(10, 3);
+  BloomFilter<string> b = new BloomFilter<string>(10, 3);
 }
