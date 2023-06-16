@@ -1,4 +1,37 @@
-#include "BloomFilter.h"
+#include<functional>
+#include<string>
+
+using namespace std;
+
+template <typename T>
+class BloomFilter{
+  
+ private:
+  int m;
+  int k;
+  int* arr;
+  int* shifts;
+  hash<T> hash_fxn;
+
+ public:
+  BloomFilter();
+  BloomFilter(int m, int k, hash<T> hash_fxn);
+  bool insert(T obj);
+  bool query(T obj);
+
+  //void createHashFxns();
+  
+};
+
+template <typename T>
+BloomFilter<T>::BloomFilter(){
+  this->m = 10;
+  this->k = 3;
+
+  this->arr = new int[m];
+  this->shifts = new int[k];
+  this->hash_fxn = hash_fxn;
+}
 
 template <typename T>
 BloomFilter<T>::BloomFilter(int m, int k, hash<T> hash_fxn){
