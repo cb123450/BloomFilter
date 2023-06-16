@@ -1,5 +1,6 @@
 #include<functional>
 #include<string>
+#include <iostream>
 
 using namespace std;
 
@@ -9,14 +10,13 @@ class BloomFilter{
  private:
   int m;
   int k;
-  int* arr;
-  int* shifts;
+  int* bit_arr;
   hash<T> hash_fxn;
 
  public:
   BloomFilter();
   BloomFilter(int m, int k, hash<T> hash_fxn);
-  bool insert(T obj);
+  void insert(T obj);
   bool query(T obj);
 
   //void createHashFxns();
@@ -28,8 +28,7 @@ BloomFilter<T>::BloomFilter(){
   this->m = 10;
   this->k = 3;
 
-  this->arr = new int[m];
-  this->shifts = new int[k];
+  this->bit_arr = new int[m];
   this->hash_fxn = hash_fxn;
 }
 
@@ -38,22 +37,43 @@ BloomFilter<T>::BloomFilter(int m, int k, hash<T> hash_fxn){
   this->m = m;
   this->k = k;
   
-  this->arr = new int[m];
-  this->shifts = new int[k];
+  this->bit_arr = new int[m];
   this->hash_fxn = hash_fxn;
+
+  for (int i = 0; i < m; i++){
+    bit_arr[i] = 0;
+  }
 }
 
 template <typename T>
-bool BloomFilter<T>::insert(T obj){
-  return true;
+void BloomFilter<T>::insert(T obj){
+
+  for (int shift = 0; shift < k; shift++){
+    int res = (this->hash_fxn(obj) >> shift)%m;
+    bit_arr[res]= 1;
+  }
 }
 
 template <typename T>
 bool BloomFilter<T>::query(T obj){
-  return true;
+  for (int shift = 0; shift < k; shift++){
+    int res = (this->hash_fxn(obj) >> shift)%m;
+    if (bit_arr[res] == 0){
+      return false;
+    }
+    return true; 
+  }
 }
 
 int main(){
-  std::hash<string> string_hash; 
-  BloomFilter<string> b(10, 3, string_hash);
+   
+ 
+  hash<int> string_hash; 
+  BloomFilter<int> b(10, 3, string_hash);
+
+  b.insert(4);
+  cout << b.query(5);
+  cout << "\n";
+  
+  return 0;
 }
