@@ -1,36 +1,17 @@
-#include "BloomFilter.cpp"
-
-template<typename T>
-class CountingBloomFilter : private BloomFilter<T>{
-public:
-  void delete(T obj);
-  CountingBloomFilter() : BloomFilter();
-  CountingBloomFilter(int m, int k, hash<T> hash_fxn) : BloomFilter(int m, int k, hash<T> hash_fxn);
-};
-
-/*
-template <typename T>
-CountingBloomFilter<T>::CountingBloomFilter(){
-  BloomFilter();
-}
-
-template <typename T>
-CountingBloomFilter<T>::CountingBloomFilter(int m, int k, hash<T> hash_fxn){
-  BloomFilter(m, k, hash_fxn);
-}
-*/
+#include "CountingBloomFilter.h"
 
 template <typename T>
 void CountingBloomFilter<T>::insert(T obj){
-  for (int shift = 0; shift < k; shift++){
-  int res = (this->hash_fxn(obj) >> shift)%m;
+  for (int shift = 0; shift < this.k; shift++){
+    int res = (this->hash_fxn(obj) >> shift)%m;
     bit_arr[res];
   }
 }
 
 template <typename T>
 bool CountingBloomFilter<T>::query(T obj, int count){
-  for (int shift = 0; shift < k; shift++){
+
+  for (int shift = 0; shift < this.k; shift++){
     int res = (this->hash_fxn(obj) >> shift)%m;
     if (bit_arr[res] < count){
       return false;

@@ -1,27 +1,4 @@
-#include<functional>
-#include<string>
-#include <iostream>
-
-using namespace std;
-
-template <typename T>
-class BloomFilter{
-  
- private:
-  int m;
-  int k;
-  int* bit_arr;
-  hash<T> hash_fxn;
-
- public:
-  BloomFilter();
-  BloomFilter(int m, int k, hash<T> hash_fxn);
-  void insert(T obj);
-  bool query(T obj);
-
-  //void createHashFxns();
-  
-};
+#include "BloomFilter.h"
 
 template <typename T>
 BloomFilter<T>::BloomFilter(){
@@ -61,8 +38,8 @@ bool BloomFilter<T>::query(T obj){
     if (bit_arr[res] == 0){
       return false;
     }
-    return true; 
   }
+  return true;
 }
 
 int main(){
