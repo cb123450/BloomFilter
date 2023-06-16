@@ -7,7 +7,7 @@ using namespace std;
 template <typename T>
 class BloomFilter{
   
- private:
+ public:
   int m;
   int k;
   int* bit_arr;

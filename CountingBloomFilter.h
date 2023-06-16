@@ -6,5 +6,5 @@ class CountingBloomFilter : private BloomFilter<T>{
   CountingBloomFilter(int m, int k, hash<T> hash_fxn);
   void insert(T obj);
   bool query(T obj, int count);
-  void delete(T obj);
+  void deleteObj(T obj);
 };
