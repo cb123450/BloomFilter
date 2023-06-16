@@ -50,7 +50,7 @@ void BloomFilter<T>::insert(T obj){
 
   for (int shift = 0; shift < k; shift++){
     int res = (this->hash_fxn(obj) >> shift)%m;
-    bit_arr[res]= 1;
+    bit_arr[res] = 1;
   }
 }
 
