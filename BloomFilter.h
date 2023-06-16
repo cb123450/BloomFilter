@@ -1,4 +1,5 @@
 #include<functional>
+#include<string>
 
 using namespace std;
 
@@ -6,14 +7,14 @@ template <typename T>
 class BloomFilter{
   
  private:
-  int arr[];
   int m;
   int k;
+  int* arr;
+  int* shifts;
   hash<T> hash_fxn;
-  int shifts[];
 
  public:
-  BloomFilter(int m, int k);
+  BloomFilter(int m, int k, hash<T> hash_fxn);
 
   bool insert(T obj);
   bool query(T obj);
@@ -22,4 +23,4 @@ class BloomFilter{
   
 };
 
-#include "BloomFilter.cpp"
+
