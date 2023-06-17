@@ -35,8 +35,8 @@ void CountingBloomFilter<T>::deleteObj(T obj){
 }
 
 int main(){
-  hash<int> string_hash;
-  CountingBloomFilter<int> c(10, 3, string_hash);
+  hash<int> int_hash;
+  CountingBloomFilter<int> c(10, 3, int_hash);
 
   c.insert(3);
   c.insert(3);
