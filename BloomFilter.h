@@ -1,6 +1,7 @@
 #include<functional>
 #include<string>
 #include <iostream>
+#include <bitset>
 
 using namespace std;
 
@@ -10,7 +11,7 @@ class BloomFilter{
  public:
   int m;
   int k;
-  int* bit_arr;
+  bitset<10> bit_arr;
   hash<T> hash_fxn;
 
  public:
