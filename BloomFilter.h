@@ -11,7 +11,7 @@ class BloomFilter{
  public:
   int m;
   int k;
-  bitset<1> bit_arr;
+  bitset<10> bit_arr;
   hash<T> hash_fxn;
 
  public:

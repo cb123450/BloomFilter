@@ -1,6 +1,7 @@
 #include "CountingBloomFilter.cpp"
 
 int main(){
+/*
   hash<int> int_hash;
   CountingBloomFilter<int> c(10, 3, int_hash);
 
@@ -23,6 +24,15 @@ int main(){
   c.deleteObj(3);
   cout << c.query(3,3); // 0
   cout << "\n";
+*/
+  hash<int> string_hash; 
+  BloomFilter<int> b(10, 3, string_hash);
+
+  b.insert(4);
+  cout << b.query(5);
+  cout << "\n";
+  cout << b.query(4);
 
   return 0;
+
 }
