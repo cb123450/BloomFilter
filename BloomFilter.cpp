@@ -41,16 +41,3 @@ bool BloomFilter<T>::query(T obj){
   }
   return true;
 }
-
-int main(){
-   
- 
-  hash<int> string_hash; 
-  BloomFilter<int> b(10, 3, string_hash);
-
-  b.insert(4);
-  cout << b.query(5);
-  cout << "\n";
-  
-  return 0;
-}
