@@ -1,6 +1,12 @@
 #include<functional>
 #include<string>
 #include <iostream>
+#include <cmath>
+#include <bitset>
+
+#define BITSET_SIZE 1024
+#define NUM_HASH_FXNS 3
+#define LENGTH 5
 
 using namespace std;
 
@@ -10,8 +16,9 @@ class BloomFilter{
  public:
   int m;
   int k;
-  int* bit_arr;
   hash<T> hash_fxn;
+  int bit_arr_size;
+  bitset<BITSET_SIZE>* bit_arr;
 
  public:
   BloomFilter();
@@ -21,4 +28,8 @@ class BloomFilter{
   virtual void insert(T obj);
 
   virtual bool query(T obj);
+
+  int total_bits_allocated();
+
+  int bits_user_asked_for();
 };
