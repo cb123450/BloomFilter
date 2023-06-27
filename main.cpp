@@ -40,9 +40,11 @@ int main(int argc, char* argv[]){
   cout << c.query("tree"); //0
   cout << "\n";
   
-  cout << "Total number of bits allocated: " + c.total_bits_allocated();
+  cout << "Total number of bits allocated: ";
+  cout <<  c.total_bits_allocated();
   cout << "\n";
-  cout << "Bits user asked for: " + c.bits_user_asked_for();
+  cout << "Bits user asked for: ";
+  cout << c.bits_user_asked_for();
   cout << "\n";
 
   return 0;

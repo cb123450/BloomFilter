@@ -10,7 +10,7 @@ template <typename T>
 BloomFilter<T>::BloomFilter(int m, int k, hash<T> hash_fxn){
   this->m = m;
   this->k = k;
-  this->bit_arr_size = ceil(m/BITSET_SIZE);  
+  this->bit_arr_size = ceil((double)m/BITSET_SIZE);  
   this->bit_arr = new bitset<BITSET_SIZE>[this->bit_arr_size];
   
   this->hash_fxn = hash_fxn;
@@ -27,7 +27,7 @@ void BloomFilter<T>::insert(T obj){
 
   for (int shift = 0; shift < k; shift++){
     unsigned int hash = this->hash_fxn(obj) >> shift;
-    unsigned int outer_index = hash/1024;
+    unsigned int outer_index = (hash%(1024 * bit_arr_size))/1024;
     unsigned int inner_index = hash%1024;
     bit_arr[outer_index][inner_index] = 1;
   }
@@ -37,7 +37,7 @@ template <typename T>
 bool BloomFilter<T>::query(T obj){
   for (int shift = 0; shift < k; shift++){
     unsigned int hash = this->hash_fxn(obj) >> shift;
-    unsigned int outer_index = hash/1024;
+    unsigned int outer_index = (hash%(1024 * bit_arr_size))/1024;
     unsigned int inner_index = hash%1024;
 
     if (bit_arr[outer_index][inner_index] == 0){
