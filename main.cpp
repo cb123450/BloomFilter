@@ -2,13 +2,46 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <queue>
+#include <tuple>
+#include <thread>
 
+template<typename T>
+int run_t(queue<T>* q){
+  while (!q.empty()){
+    std::tie(action, item) = q.pop();
+  }
+}
 
 int main(int argc, char* argv[]){
 #undef LENGTH
 #define LENGTH atoi(argv[1])
 #undef NUM_HASH_FXNS
 #define NUM_HASH_FXNS atoi(argv[2])
+
+  hash<string> _hash;
+  BloomFilter<string> c(LENGTH, NUM_HASH_FXNS, _hash);
+  
+  queue<string> q;
+  q.push(make_tuple("W", "bat"));
+  q.push(make_tuple("W", "car"));
+  q.push(make_tuple("W", "cat"));
+  q.push(make_tuple("W", "tree"));
+  q.push(make_tuple("W", "bush"));
+  q.push(make_tuple("W", "brick"));
+
+  q.push(make_tuple("R", "bat"));
+  q.push(make_tuple("R", "car"));
+  q.push(make_tuple("R", "cat"));
+  
+  q.push(make_tuple("R", "boat"));
+  q.push(make_tuple("R", "block"));
+  q.push(make_tuple("R", "house"));
+
+  std::thread t_1 (run_t, q);
+  std::thread t_2 (run_t, q);
+  std::thread t_3 (run_t, q);
+  
+  return 0;
 
   /* INTS work
   hash<int> _hash;
@@ -50,9 +83,6 @@ int main(int argc, char* argv[]){
   cout << c.bits_user_asked_for();
   cout << "\n";
   */
-  queue<string> q;
-  q.insert();
-  return 0;
 
   /* CountingBloomFilter Tests
   c.insert(3);
