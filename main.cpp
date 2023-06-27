@@ -1,6 +1,8 @@
 #include "CountingBloomFilter.cpp"
 #include <stdlib.h>
 #include <stdio.h>
+#include <queue>
+
 
 int main(int argc, char* argv[]){
 #undef LENGTH
@@ -24,7 +26,8 @@ int main(int argc, char* argv[]){
   cout << c.query(10); //0
   cout << "\n";		  
   */
-  
+
+  /* STRING TESTS
   hash<string> _hash;
   BloomFilter<string> c(LENGTH, NUM_HASH_FXNS, _hash);
 
@@ -46,7 +49,9 @@ int main(int argc, char* argv[]){
   cout << "Bits user asked for: ";
   cout << c.bits_user_asked_for();
   cout << "\n";
-
+  */
+  queue<string> q;
+  q.insert();
   return 0;
 
   /* CountingBloomFilter Tests
