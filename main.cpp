@@ -9,10 +9,12 @@ template<typename T>
 void *run_t(void *param){
   string action;
   string item;
-  auto q = (queue<T>) param;
-  while (!q.empty()){
-    std::tie (action, item) = q.pop();
+  T* q = static_cast<T*> (param);
+  while (!q->empty()){
+    std::tie (action, item) = q->front();
+    q->pop();
   }
+  return NULL;
 }
 
 int main(int argc, char* argv[]){
@@ -53,7 +55,7 @@ int main(int argc, char* argv[]){
 
 
   pthread_t pt1;
-  pthread_create(&pt1, NULL, run_t, &q);
+  pthread_create(&pt1, NULL, run_t<queue<tuple<string,string>>>, &q);
 //  thread t_2 (run_t, q);
 //  thread t_3 (run_t, q);
   
