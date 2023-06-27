@@ -26,9 +26,9 @@ template <typename T>
 void BloomFilter<T>::insert(T obj){
 
   for (int shift = 0; shift < k; shift++){
-    int hash = this->hash_fxn(obj) >> shift;
-    int outer_index = hash/1024;
-    int inner_index = hash%1024;
+    unsigned int hash = this->hash_fxn(obj) >> shift;
+    unsigned int outer_index = hash/1024;
+    unsigned int inner_index = hash%1024;
     bit_arr[outer_index][inner_index] = 1;
   }
 }
@@ -36,9 +36,9 @@ void BloomFilter<T>::insert(T obj){
 template <typename T>
 bool BloomFilter<T>::query(T obj){
   for (int shift = 0; shift < k; shift++){
-    int hash = this->hash_fxn(obj) >> shift;
-    int outer_index = hash/1024;
-    int inner_index = hash%1024;
+    unsigned int hash = this->hash_fxn(obj) >> shift;
+    unsigned int outer_index = hash/1024;
+    unsigned int inner_index = hash%1024;
 
     if (bit_arr[outer_index][inner_index] == 0){
       return false;
