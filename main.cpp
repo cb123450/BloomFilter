@@ -8,23 +8,41 @@ int main(int argc, char* argv[]){
 #undef NUM_HASH_FXNS
 #define NUM_HASH_FXNS atoi(argv[2])
 
-  hash<int> int_hash;
-  BloomFilter<int> c(LENGTH, NUM_HASH_FXNS, int_hash);
+  /* INTS work
+  hash<int> _hash;
+  BloomFilter<int> c(LENGTH, NUM_HASH_FXNS, _hash);
 
-  c.insert(300);
-  c.insert(551);
+  c.insert(5);
+  c.insert(400);
 
-  cout << c.query(330);
-  cout <<  "\n"; //1
-  cout << c.query(551);
-  cout << "\n"; //1
-  cout << c.query(7);
-  cout << "\n"; //0
-  cout << "Total number of bits allocated: ";
-  cout << c.total_bits_allocated();
+  cout << _hash(5);
   cout << "\n";
-  cout << "Bits user asked for: ";
-  cout << c.bits_user_asked_for();
+  cout << c.query(5); //1
+  cout << "\n";		  
+  cout << c.query(400); //1
+  cout << "\n";		  
+  cout << c.query(10); //0
+  cout << "\n";		  
+  */
+  
+  hash<string> _hash;
+  BloomFilter<string> c(LENGTH, NUM_HASH_FXNS, _hash);
+
+  c.insert("bat");
+  c.insert("car");
+
+  cout << _hash("bat");
+  cout << "\n";
+  cout << c.query("bat"); //1
+  cout << "\n";
+  cout << c.query("car"); //1
+  cout << "\n";
+  cout << c.query("tree"); //0
+  cout << "\n";
+  
+  cout << "Total number of bits allocated: " + c.total_bits_allocated();
+  cout << "\n";
+  cout << "Bits user asked for: " + c.bits_user_asked_for();
   cout << "\n";
 
   return 0;
