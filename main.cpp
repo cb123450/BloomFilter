@@ -3,12 +3,15 @@
 #include <stdio.h>
 #include <queue>
 #include <tuple>
-#include <thread>
+#include <pthread.h>
 
 template<typename T>
-int run_t(queue<T>* q){
+void *run_t(void *param){
+  string action;
+  string item;
+  auto q = (queue<T>) param;
   while (!q.empty()){
-    std::tie(action, item) = q.pop();
+    std::tie (action, item) = q.pop();
   }
 }
 
@@ -21,26 +24,41 @@ int main(int argc, char* argv[]){
   hash<string> _hash;
   BloomFilter<string> c(LENGTH, NUM_HASH_FXNS, _hash);
   
-  queue<string> q;
-  q.push(make_tuple("W", "bat"));
-  q.push(make_tuple("W", "car"));
-  q.push(make_tuple("W", "cat"));
-  q.push(make_tuple("W", "tree"));
-  q.push(make_tuple("W", "bush"));
-  q.push(make_tuple("W", "brick"));
+  queue<tuple<string,string>> q;
+  auto a = make_tuple("W", "bat");
+  auto b = make_tuple("W", "car");
+  auto m = make_tuple("W", "cat");
+  auto d = make_tuple("W", "tree");
+  auto e = make_tuple("W", "bush");
+  auto f = make_tuple("W", "brick");
+  auto g = make_tuple("R", "bat");
+  auto h = make_tuple("R", "car");
+  auto i = make_tuple("R", "cat");
+  auto j = make_tuple("R", "boat");
+  auto k = make_tuple("R", "block");
+  auto l = make_tuple("R", "house");
 
-  q.push(make_tuple("R", "bat"));
-  q.push(make_tuple("R", "car"));
-  q.push(make_tuple("R", "cat"));
-  
-  q.push(make_tuple("R", "boat"));
-  q.push(make_tuple("R", "block"));
-  q.push(make_tuple("R", "house"));
+  q.push(a);
+  q.push(b);
+  q.push(m);
+  q.push(d);
+  q.push(e);
+  q.push(f);
+  q.push(g);
+  q.push(h);
+  q.push(i);
+  q.push(j);
+  q.push(k);
+  q.push(l);
 
-  std::thread t_1 (run_t, q);
-  std::thread t_2 (run_t, q);
-  std::thread t_3 (run_t, q);
+
+  pthread_t pt1;
+  pthread_create(&pt1, NULL, run_t, &q);
+//  thread t_2 (run_t, q);
+//  thread t_3 (run_t, q);
   
+  
+
   return 0;
 
   /* INTS work
