@@ -6,10 +6,23 @@
 #include <pthread.h>
 
 template<typename T>
+struct thread_data{
+  BloomFilter<T>* bf;
+  queue<tuple<string, T>>* q;
+};
+
+/*
+ * K is the type of 'item'
+ * This is the type of the object stored in the BloomFilter and the item stored in the queue
+ */
+template<typename K>
 void *run_t(void *param){
+
   string action;
   string item;
-  T* q = static_cast<T*> (param);
+  thread_data<K>* td = (thread_data<K> *) param;
+  queue<tuple<string, K>>* q = td->q;
+
   while (!q->empty()){
     std::tie (action, item) = q->front();
     q->pop();
@@ -25,8 +38,9 @@ int main(int argc, char* argv[]){
 
   hash<string> _hash;
   BloomFilter<string> c(LENGTH, NUM_HASH_FXNS, _hash);
+  queue<tuple<string, string>> q;  
+  thread_data<string> td = {&c, &q};
   
-  queue<tuple<string,string>> q;
   auto a = make_tuple("W", "bat");
   auto b = make_tuple("W", "car");
   auto m = make_tuple("W", "cat");
@@ -54,8 +68,11 @@ int main(int argc, char* argv[]){
   q.push(l);
 
 
+  
   pthread_t pt1;
-  pthread_create(&pt1, NULL, run_t<queue<tuple<string,string>>>, &q);
+  pthread_create(&pt1, NULL, run_t<string>, &td);
+  pthread_join(pt1, NULL);
+  
 //  thread t_2 (run_t, q);
 //  thread t_3 (run_t, q);
   
