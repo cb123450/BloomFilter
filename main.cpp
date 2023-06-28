@@ -22,7 +22,7 @@ template<typename K>
 void *run_t(void *param){
 
   string action;
-  string item;
+  int item;
   thread_data<K>* td = (thread_data<K> *) param;
   queue<tuple<string, K>>* q = td->q;
   BloomFilter<K>* bf = td->bf;
@@ -68,13 +68,27 @@ int main(int argc, char* argv[]){
 #define LENGTH atoi(argv[1])
 #undef NUM_HASH_FXNS
 #define NUM_HASH_FXNS atoi(argv[2])
+#define NUM_THREADS atoi(argv[3])
+#define NUM_TASKS atoi(argv[4])
+
   int rc = pthread_spin_init(&spinlock, PTHREAD_PROCESS_PRIVATE);
   assert(rc == 0);
-  hash<string> _hash;
-  BloomFilter<string> c(LENGTH, NUM_HASH_FXNS, _hash);
-  queue<tuple<string, string>> q;  
-  thread_data<string> td = {&c, &q};
+  hash<int> _hash;
+  BloomFilter<int> c(LENGTH, NUM_HASH_FXNS, _hash);
+  queue<tuple<string, int>> q;  
+  thread_data<int> td = {&c, &q};
+
+  srand(time(0));
+  for (int i = 0; i < NUM_TASKS; i++) {
+    string RW = "W";
+    if (rand() % 2) {
+      RW = "R";
+    }
+    auto tuple = make_tuple(RW, (rand() % 5000) + 1);
+    q.push(tuple);
+  }
   
+  /*  
   auto a = make_tuple("W", "bat");
   auto b = make_tuple("W", "car");
   auto m = make_tuple("W", "cat");
@@ -100,20 +114,15 @@ int main(int argc, char* argv[]){
   q.push(j);
   q.push(k);
   q.push(l);
-
+  */
   
-  pthread_t pt1;
-  pthread_create(&pt1, NULL, run_t<string>, &td);
-  
-  pthread_t pt2;
-  pthread_create(&pt2, NULL, run_t<string>, &td);
-
-  pthread_t pt3;
-  pthread_create(&pt3, NULL, run_t<string>, &td);
-  
-  pthread_join(pt1, NULL);
-  pthread_join(pt2, NULL);
-  pthread_join(pt3, NULL);
+  pthread_t * pthreads = new pthread_t[NUM_THREADS];
+  for (int j = 0; j < NUM_THREADS; j++) {
+    pthread_create(&pthreads[j], NULL, run_t<int>, &td);
+  }
+  for (int k = 0; k < NUM_THREADS; k++) {
+    pthread_join(pthreads[k], NULL);
+  }
   
   return 0;
 
