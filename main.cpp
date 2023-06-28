@@ -5,6 +5,8 @@
 #include <tuple>
 #include <pthread.h>
 #include <cstring>
+#include <assert.h>
+pthread_spinlock_t spinlock;
 
 template<typename T>
 struct thread_data{
@@ -25,24 +27,39 @@ void *run_t(void *param){
   queue<tuple<string, K>>* q = td->q;
   BloomFilter<K>* bf = td->bf;
 
+  bool done = false;
 
-  while (!q->empty()){
-    std::tie (action, item) = q->front();
-    q->pop();
-    //cout << pthread_self();
-    //cout << ": ";
-    if (action.compare("R") == 0) {
-      //cout << action;
-      //cout << " ";
-      bf->query(item);
-    } else if (action.compare("W") == 0) {
-      //cout << action;
-      //cout << " ";
-      //cout << item;
-      //cout << " was inserted";
-      bf->insert(item);
+  while (!done){
+    int rc = pthread_spin_lock(&spinlock);
+    assert(rc == 0);
+    
+    if (!q->empty()){
+      std::tie (action, item) = q->front();
+      q->pop();
+      rc = pthread_spin_unlock(&spinlock);
+      assert(rc == 0);
+    
+      //cout << pthread_self();
+      //cout << ": ";
+      if (action.compare("R") == 0) {
+	//cout << action;
+	//cout << " ";
+	bf->query(item);
+      } else if (action.compare("W") == 0) {
+	//cout << action;
+	//cout << " ";
+	//cout << item;
+	//cout << " was inserted";
+	bf->insert(item);
+      }
+    }
+    else{
+      done = true;
     }
   }
+  //no way to unlock twice because threads do not share local variables
+  int rc = pthread_spin_unlock(&spinlock); 
+  assert(rc == 0);
   return NULL;
 }
 
@@ -51,7 +68,8 @@ int main(int argc, char* argv[]){
 #define LENGTH atoi(argv[1])
 #undef NUM_HASH_FXNS
 #define NUM_HASH_FXNS atoi(argv[2])
-
+  int rc = pthread_spin_init(&spinlock, PTHREAD_PROCESS_PRIVATE);
+  assert(rc == 0);
   hash<string> _hash;
   BloomFilter<string> c(LENGTH, NUM_HASH_FXNS, _hash);
   queue<tuple<string, string>> q;  
