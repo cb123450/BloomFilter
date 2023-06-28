@@ -19,8 +19,8 @@ class BloomFilter{
   int k;
   hash<T> hash_fxn;
   int bit_arr_size;
+  pthread_rwlock_t* lock_arr;
   bitset<BITSET_SIZE>* bit_arr;
-  pthread_rwlock_t rwlock;
   
  public:
   BloomFilter();
