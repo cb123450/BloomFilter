@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <bitset>
+#include <pthread.h>
 
 #define BITSET_SIZE 1024
 #define NUM_HASH_FXNS 3
@@ -19,7 +20,8 @@ class BloomFilter{
   hash<T> hash_fxn;
   int bit_arr_size;
   bitset<BITSET_SIZE>* bit_arr;
-
+  pthread_rwlock_t rwlock;
+  
  public:
   BloomFilter();
 

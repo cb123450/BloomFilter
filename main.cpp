@@ -4,6 +4,7 @@
 #include <queue>
 #include <tuple>
 #include <pthread.h>
+#include <cstring>
 
 template<typename T>
 struct thread_data{
@@ -22,10 +23,25 @@ void *run_t(void *param){
   string item;
   thread_data<K>* td = (thread_data<K> *) param;
   queue<tuple<string, K>>* q = td->q;
+  BloomFilter<K>* bf = td->bf;
+
 
   while (!q->empty()){
     std::tie (action, item) = q->front();
     q->pop();
+    //cout << pthread_self();
+    //cout << ": ";
+    if (action.compare("R") == 0) {
+      //cout << action;
+      //cout << " ";
+      bf->query(item);
+    } else if (action.compare("W") == 0) {
+      //cout << action;
+      //cout << " ";
+      //cout << item;
+      //cout << " was inserted";
+      bf->insert(item);
+    }
   }
   return NULL;
 }
@@ -67,16 +83,19 @@ int main(int argc, char* argv[]){
   q.push(k);
   q.push(l);
 
-
   
   pthread_t pt1;
   pthread_create(&pt1, NULL, run_t<string>, &td);
+  
+  pthread_t pt2;
+  pthread_create(&pt2, NULL, run_t<string>, &td);
+
+  pthread_t pt3;
+  pthread_create(&pt3, NULL, run_t<string>, &td);
+  
   pthread_join(pt1, NULL);
-  
-//  thread t_2 (run_t, q);
-//  thread t_3 (run_t, q);
-  
-  
+  pthread_join(pt2, NULL);
+  pthread_join(pt3, NULL);
 
   return 0;
 
