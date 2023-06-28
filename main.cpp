@@ -96,7 +96,7 @@ int main(int argc, char* argv[]){
   pthread_join(pt1, NULL);
   pthread_join(pt2, NULL);
   pthread_join(pt3, NULL);
-
+  
   return 0;
 
   /* INTS work

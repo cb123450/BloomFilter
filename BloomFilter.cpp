@@ -28,37 +28,45 @@ BloomFilter<T>::BloomFilter(int m, int k, hash<T> hash_fxn){
 
 template <typename T>
 void BloomFilter<T>::insert(T obj){
+  cout << pthread_self() << ": About to WriteLock \n";
   int rc = pthread_rwlock_wrlock(&rwlock);
   assert(rc == 0);
+  cout << "Success WriteLock \n";
   for (int shift = 0; shift < k; shift++){
     unsigned int hash = this->hash_fxn(obj) >> shift;
     unsigned int outer_index = (hash%(1024 * bit_arr_size))/1024;
     unsigned int inner_index = hash%1024;
     bit_arr[outer_index][inner_index] = 1;
   }
-  cout << pthread_self();
-  cout << ": W \n-";
+  cout << pthread_self() << ": W \n-"<< "About to WriteUnlock \n";
   rc = pthread_rwlock_unlock(&rwlock);
   assert(rc == 0);
+  cout << "Success WriteUnlock \n";
 }
 
 template <typename T>
 bool BloomFilter<T>::query(T obj){
+  cout << pthread_self() << ": About to ReadLock\n";
   int rc = pthread_rwlock_rdlock(&rwlock);
   assert(rc == 0);
+  cout << "Success ReadLock\n";
   for (int shift = 0; shift < k; shift++){
     unsigned int hash = this->hash_fxn(obj) >> shift;
     unsigned int outer_index = (hash%(1024 * bit_arr_size))/1024;
     unsigned int inner_index = hash%1024;
 
     if (bit_arr[outer_index][inner_index] == 0){
+      cout << pthread_self() << ": R \n" << "About to ReadUnlock \n";
+      rc = pthread_rwlock_unlock(&rwlock);
+      assert(rc == 0);
+      cout << "Success ReadUnlock\n";
       return false;
     }
   }
-  cout << pthread_self();
-  cout << ": R \n";
+  cout << pthread_self() << ": R \n" << "About to ReadUnlock \n";
   rc = pthread_rwlock_unlock(&rwlock);
   assert(rc == 0);
+  cout << "Success ReadUnlock\n";
   return true;
 }
 

@@ -30,7 +30,7 @@ class BloomFilter{
   virtual void insert(T obj);
 
   virtual bool query(T obj);
-
+  
   int total_bits_allocated();
 
   int bits_user_asked_for();
