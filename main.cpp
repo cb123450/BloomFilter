@@ -168,17 +168,17 @@ int main(int argc, char* argv[]){
   
   pthread_t * consumers = new pthread_t[NUM_CONSUMERS];
   for (int j = 0; j < NUM_CONSUMERS; j++) {
-    pthread_create(&pthreads[j], NULL, consumer, &td);
+    pthread_create(&consumers[j], NULL, consumer, &td);
   }
 
   pthread_t prod;
   pthread_create(&prod, NULL, producer, &td);
   
   for (int k = 0; k < NUM_CONSUMERS; k++) {
-    pthread_join(pthreads[k], NULL);
+    pthread_join(consumers[k], NULL);
   }
 
-  pthread_join(producer, NULL);
+  pthread_join(prod, NULL);
   
   return 0;
   
