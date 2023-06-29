@@ -7,7 +7,7 @@
 #include <cstring>
 #include <assert.h>
 #include <vector>
-#define TYPE string
+#define TYPE int
 #define MAX 1000
 
 
@@ -43,7 +43,7 @@ struct thread_data{
 
 
 
-pthread_cond_t empty, fill;
+pthread_cond_t empty, filled;
 pthread_mutex_t mutex;
 
 /*
@@ -65,7 +65,7 @@ void* producer(void* param){
     }
     auto tuple = make_tuple(RW, (rand() % 5000) + 1);
     put(tuple);
-    pthread_cond_signal(&fill);
+    pthread_cond_signal(&filled);
     pthread_mutex_unlock(&mutex);
   }
 }
@@ -80,19 +80,19 @@ void* consumer(void* param){
   thread_data<TYPE>* td = (thread_data<TYPE> *) param;
   int num_tasks = td->n_t;
 
-  for (i = 0; i < num_tasks; i++){
+  for (int i = 0; i < num_tasks; i++){
     pthread_mutex_lock(&mutex);
     
     while(count == 0){
-      pthread_cond_wait(&fill, &mutex);
+      pthread_cond_wait(&filled, &mutex);
 
       std::tie (action, item) = get();
 
       //Insert item into BloomFilter
       if (action.compare("R") == 0) {
-	bf->query(item);
+	td->bf->query(item);
       } else if (action.compare("W") == 0) {
-	bf->insert(item);
+	td->bf->insert(item);
       }
 
       pthread_cond_signal(&empty);
@@ -159,11 +159,10 @@ int main(int argc, char* argv[]){
 #define NUM_CONSUMERS atoi(argv[3])
 #define NUM_TASKS atoi(argv[4])
 
-  int rc = pthread_mutex_init(&mutex, PTHREAD_PROCESS_PRIVATE);
+  int rc = pthread_mutex_init(&mutex, NULL);
   assert(rc == 0);
   hash<TYPE> _hash;
   BloomFilter<TYPE> c(LENGTH, NUM_HASH_FXNS, _hash);
-  queue<tuple<string, TYPE>> q;  
   thread_data<TYPE> td = {&c, NUM_TASKS};
 
   
@@ -172,8 +171,8 @@ int main(int argc, char* argv[]){
     pthread_create(&pthreads[j], NULL, consumer, &td);
   }
 
-  pthread_t* producer;
-  pthread_create(&producer, NULL, producer, &td);
+  pthread_t prod;
+  pthread_create(&prod, NULL, producer, &td);
   
   for (int k = 0; k < NUM_CONSUMERS; k++) {
     pthread_join(pthreads[k], NULL);
