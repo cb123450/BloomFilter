@@ -26,11 +26,22 @@ void put(tuple<string, TYPE> val) {
 }
 
 tuple<string, TYPE> get(){
-  TYPE ret = buff[get_pointer];
+  tuple<string, TYPE> ret = buff[get_pointer];
   get_pointer = (get_pointer + 1) % MAX;
   count -= 1;
   return ret;
 }
+
+/*
+ * struc to hold data about our bloomfilter to pass it to 'run_t'
+ */
+template<typename T>
+struct thread_data{
+  BloomFilter<T>* bf;
+  int n_t;
+};
+
+
 
 pthread_cond_t empty, fill;
 pthread_mutex_t mutex;
@@ -39,8 +50,9 @@ pthread_mutex_t mutex;
  * producer threads
  */
 void* producer(void* param){
-  int num_tasks = param.n_t;
-  
+  thread_data<TYPE>* td = (thread_data<TYPE> *) param;
+  int num_tasks = td->n_t;
+
   srand(time(0));
   for (int i = 0; i < num_tasks; i++) {
     pthread_mutex_lock(&mutex);
@@ -65,8 +77,8 @@ string action;
 TYPE item;
 void* consumer(void* param){
   
-  thread_data<K>* td = (thread_data<K> *) param;
-  int num_tasks = param.n_t;
+  thread_data<TYPE>* td = (thread_data<TYPE> *) param;
+  int num_tasks = td->n_t;
 
   for (i = 0; i < num_tasks; i++){
     pthread_mutex_lock(&mutex);
@@ -88,17 +100,6 @@ void* consumer(void* param){
     }
   }
 }
-
-/*
- * struc to hold data about our bloomfilter to pass it to 'run_t'
- */
-template<typename T>
-struct thread_data{
-  BloomFilter<T>* bf;
-  int n_t;
-};
-
-
 
 /*
  * K is the type of 'item'
@@ -163,7 +164,7 @@ int main(int argc, char* argv[]){
   hash<TYPE> _hash;
   BloomFilter<TYPE> c(LENGTH, NUM_HASH_FXNS, _hash);
   queue<tuple<string, TYPE>> q;  
-  thread_data<int> td = {&c, NUM_TASKS};
+  thread_data<TYPE> td = {&c, NUM_TASKS};
 
   
   pthread_t * consumers = new pthread_t[NUM_CONSUMERS];
