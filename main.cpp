@@ -20,16 +20,20 @@ int count = 0;
 
 
 void put(tuple<string, TYPE> val) {
-  buff[put_pointer] = val;
-  put_pointer = (put_pointer + 1) % MAX;
-  count += 1;
+  if (count < MAX-1){
+    buff[put_pointer] = val;
+    put_pointer = (put_pointer + 1) % MAX;
+    count += 1;
+  }
 }
 
 tuple<string, TYPE> get(){
-  tuple<string, TYPE> ret = buff[get_pointer];
-  get_pointer = (get_pointer + 1) % MAX;
-  count -= 1;
-  return ret;
+  if (count >= 1){
+    tuple<string, TYPE> ret = buff[get_pointer];
+    get_pointer = (get_pointer + 1) % MAX;
+    count -= 1;
+    return ret;
+  }
 }
 
 /*
@@ -46,6 +50,8 @@ pthread_cond_t empty;
 pthread_cond_t filled;
 pthread_mutex_t mutex;
 
+bool producer_done = false;
+
 /*
  * producer threads
  */
@@ -54,13 +60,14 @@ void* producer(void* param){
   int num_tasks = td->n_t;
 
   srand(time(0));
-  for (int i = 0; i <= num_tasks; i++) {
+  for (int i = 0; i < num_tasks; i++) {
     //    cout << pthread_self() << ": About to lock producer" << "\n";
     int rc = pthread_mutex_lock(&mutex);
     assert(rc == 0);
     cout << pthread_self() << ": Locked producer" << "\n";    
-    while (count == MAX){
+    while (count == MAX-1){
       cout << pthread_self() << " :producer asleep" << "\n";
+      producer_done = true;
       pthread_cond_wait(&empty, &mutex);
     }
     string RW = "W";
@@ -97,26 +104,28 @@ void* consumer(void* param){
     assert(rc == 0);
     cout << pthread_self() << ": Locked consumer" << "\n";
     
-    while (count == 0){
+    while (count == 0 && !producer_done){
       cout << pthread_self() << " :consumer asleep" << "\n";
       pthread_cond_wait(&filled, &mutex);
     }
-    std::tie (action, item) = get();
+    //if (count > 0){
+      std::tie (action, item) = get();
 
-    //Insert item into BloomFilter
-    if (action.compare("R") == 0) {
-      td->bf->query(item);
-    } else if (action.compare("W") == 0) {
-      td->bf->insert(item);
-    }
-    rc = pthread_cond_signal(&empty);
-    assert(rc == 0);
-    cout << pthread_self() << " " << count << " :consumer" << "\n";
+      //Insert item into BloomFilter
+      if (action.compare("R") == 0) {
+	td->bf->query(item);
+      } else if (action.compare("W") == 0) {
+	td->bf->insert(item);
+      }
+      rc = pthread_cond_signal(&empty);
+      assert(rc == 0);
+      cout << pthread_self() << " " << count << " :consumer" << "\n";
 
-    cout << pthread_self() << ": About to unlock consumer" << "\n";
-    rc = pthread_mutex_unlock(&mutex);
-    assert(rc == 0);
-    //    cout << pthread_self() << ": Unlocked consumer" << "\n";
+      cout << pthread_self() << ": About to unlock consumer" << "\n";
+      rc = pthread_mutex_unlock(&mutex);
+      assert(rc == 0);
+      //    cout << pthread_self() << ": Unlocked consumer" << "\n";
+      //    }
   }
   return 0;
 }
