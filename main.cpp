@@ -8,15 +8,16 @@
 #include <assert.h>
 #include <vector>
 #define TYPE int
-#define MAX 1000
 
 /*
  * Buffer implementation for producer-consumer tests
  */
-tuple<string, TYPE> buff[MAX];
+int MAX = 1000;
+tuple<string, TYPE>* buff;
 int put_pointer = 0;
 int get_pointer = 0;
 int count = 0;
+
 
 void put(tuple<string, TYPE> val) {
   buff[put_pointer] = val;
@@ -53,12 +54,13 @@ void* producer(void* param){
   int num_tasks = td->n_t;
 
   srand(time(0));
-  for (int i = 0; i < num_tasks; i++) {
-    cout << pthread_self() << ": About to lock producer" << "\n";
+  for (int i = 0; i <= num_tasks; i++) {
+    //    cout << pthread_self() << ": About to lock producer" << "\n";
     int rc = pthread_mutex_lock(&mutex);
     assert(rc == 0);
     cout << pthread_self() << ": Locked producer" << "\n";    
     while (count == MAX){
+      cout << pthread_self() << " :producer asleep" << "\n";
       pthread_cond_wait(&empty, &mutex);
     }
     string RW = "W";
@@ -69,10 +71,12 @@ void* producer(void* param){
     put(tuple);
     rc = pthread_cond_signal(&filled);
     assert (rc == 0);
+    cout << pthread_self() << " :count " << count << " :MAX " << MAX  << " :producer " << "\n";
+
     cout << pthread_self() << ": About to unlock producer" << "\n";
     rc = pthread_mutex_unlock(&mutex);
     assert(rc == 0);
-    cout << pthread_self() << ": Unlocked producer" << "\n";
+    //    cout << pthread_self() << ": Unlocked producer" << "\n";
   }
   return 0;
 }
@@ -88,12 +92,13 @@ void* consumer(void* param){
   int num_tasks = td->n_t;
 
   for (int i = 0; i < num_tasks; i++){
-    cout << pthread_self() << ": About to lock consumer" << "\n";
+    //    cout << pthread_self() << ": About to lock consumer" << "\n";
     int rc = pthread_mutex_lock(&mutex);
     assert(rc == 0);
     cout << pthread_self() << ": Locked consumer" << "\n";
     
     while (count == 0){
+      cout << pthread_self() << " :consumer asleep" << "\n";
       pthread_cond_wait(&filled, &mutex);
     }
     std::tie (action, item) = get();
@@ -106,10 +111,12 @@ void* consumer(void* param){
     }
     rc = pthread_cond_signal(&empty);
     assert(rc == 0);
+    cout << pthread_self() << " " << count << " :consumer" << "\n";
+
     cout << pthread_self() << ": About to unlock consumer" << "\n";
     rc = pthread_mutex_unlock(&mutex);
     assert(rc == 0);
-    cout << pthread_self() << ": Unlocked consumer" << "\n";
+    //    cout << pthread_self() << ": Unlocked consumer" << "\n";
   }
   return 0;
 }
@@ -172,30 +179,29 @@ int main(int argc, char* argv[]){
 #define NUM_CONSUMERS atoi(argv[3])
 #define NUM_TASKS atoi(argv[4])
 
+  MAX = NUM_TASKS;
+  buff = (tuple<string, TYPE>*) malloc(MAX*sizeof(tuple<string, TYPE>));
+  
   int rc = pthread_mutex_init(&mutex, NULL);
   assert(rc == 0);
   hash<TYPE> _hash;
   BloomFilter<TYPE> c(LENGTH, NUM_HASH_FXNS, _hash);
   thread_data<TYPE> td = {&c, NUM_TASKS};
 
+  pthread_t prod;
+  pthread_create(&prod, NULL, producer, &td);
   
   pthread_t * consumers = new pthread_t[NUM_CONSUMERS];
   for (int j = 0; j < NUM_CONSUMERS; j++) {
     pthread_create(&consumers[j], NULL, consumer, &td);
   }
- 
-
-  pthread_t prod;
-  pthread_create(&prod, NULL, producer, &td);
-
-  pthread_join(prod, NULL);
-  cout << "test";
 
   for (int k = 0; k < NUM_CONSUMERS; k++) {
     pthread_join(consumers[k], NULL);
   }
-
-  cout << "Done";
+  pthread_join(prod, NULL);
+    
+  cout << "Done" << "\n";
   return 0;
   
 }
