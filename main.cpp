@@ -10,7 +10,6 @@
 #define TYPE int
 #define MAX 1000
 
-
 /*
  * Buffer implementation for producer-consumer tests
  */
@@ -42,8 +41,8 @@ struct thread_data{
 };
 
 
-
-pthread_cond_t empty, filled;
+pthread_cond_t empty;
+pthread_cond_t filled;
 pthread_mutex_t mutex;
 
 /*
@@ -55,7 +54,10 @@ void* producer(void* param){
 
   srand(time(0));
   for (int i = 0; i < num_tasks; i++) {
-    pthread_mutex_lock(&mutex);
+    cout << pthread_self() << ": About to lock producer" << "\n";
+    int rc = pthread_mutex_lock(&mutex);
+    assert(rc == 0);
+    cout << pthread_self() << ": Locked producer" << "\n";    
     while (count == MAX){
       pthread_cond_wait(&empty, &mutex);
     }
@@ -65,9 +67,14 @@ void* producer(void* param){
     }
     auto tuple = make_tuple(RW, (rand() % 5000) + 1);
     put(tuple);
-    pthread_cond_signal(&filled);
-    pthread_mutex_unlock(&mutex);
+    rc = pthread_cond_signal(&filled);
+    assert (rc == 0);
+    cout << pthread_self() << ": About to unlock producer" << "\n";
+    rc = pthread_mutex_unlock(&mutex);
+    assert(rc == 0);
+    cout << pthread_self() << ": Unlocked producer" << "\n";
   }
+  return 0;
 }
 
 /*
@@ -81,24 +88,30 @@ void* consumer(void* param){
   int num_tasks = td->n_t;
 
   for (int i = 0; i < num_tasks; i++){
-    pthread_mutex_lock(&mutex);
+    cout << pthread_self() << ": About to lock consumer" << "\n";
+    int rc = pthread_mutex_lock(&mutex);
+    assert(rc == 0);
+    cout << pthread_self() << ": Locked consumer" << "\n";
     
-    while(count == 0){
+    while (count == 0){
       pthread_cond_wait(&filled, &mutex);
-
-      std::tie (action, item) = get();
-
-      //Insert item into BloomFilter
-      if (action.compare("R") == 0) {
-	td->bf->query(item);
-      } else if (action.compare("W") == 0) {
-	td->bf->insert(item);
-      }
-
-      pthread_cond_signal(&empty);
-      pthread_mutex_unlock(&mutex);
     }
+    std::tie (action, item) = get();
+
+    //Insert item into BloomFilter
+    if (action.compare("R") == 0) {
+      td->bf->query(item);
+    } else if (action.compare("W") == 0) {
+      td->bf->insert(item);
+    }
+    rc = pthread_cond_signal(&empty);
+    assert(rc == 0);
+    cout << pthread_self() << ": About to unlock consumer" << "\n";
+    rc = pthread_mutex_unlock(&mutex);
+    assert(rc == 0);
+    cout << pthread_self() << ": Unlocked consumer" << "\n";
   }
+  return 0;
 }
 
 /*
@@ -170,16 +183,19 @@ int main(int argc, char* argv[]){
   for (int j = 0; j < NUM_CONSUMERS; j++) {
     pthread_create(&consumers[j], NULL, consumer, &td);
   }
+ 
 
   pthread_t prod;
   pthread_create(&prod, NULL, producer, &td);
-  
+
+  pthread_join(prod, NULL);
+  cout << "test";
+
   for (int k = 0; k < NUM_CONSUMERS; k++) {
     pthread_join(consumers[k], NULL);
   }
 
-  pthread_join(prod, NULL);
-  
+  cout << "Done";
   return 0;
   
 }
