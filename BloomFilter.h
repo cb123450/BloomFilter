@@ -34,4 +34,8 @@ class BloomFilter{
   int total_bits_allocated();
 
   int bits_user_asked_for();
+
+  void serialize();
+
+  void* deserialize();
 };

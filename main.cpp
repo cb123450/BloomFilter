@@ -197,6 +197,8 @@ int main(int argc, char* argv[]){
   BloomFilter<TYPE> c(LENGTH, NUM_HASH_FXNS, _hash);
   thread_data<TYPE> td = {&c, NUM_TASKS};
 
+  c.serialize();
+  /* PRODUCER CONSUMER TESTS
   pthread_t prod;
   pthread_create(&prod, NULL, producer, &td);
   
@@ -211,6 +213,8 @@ int main(int argc, char* argv[]){
   pthread_join(prod, NULL);
     
   cout << "Done" << "\n";
+  */
+  
   return 0;
   
 }
