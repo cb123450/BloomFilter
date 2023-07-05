@@ -81,16 +81,43 @@ bool BloomFilter<T>::query(T obj){
   return true;
 }
 
-void wbuf_write_uint32_t(struct wbuf* wb, uint32_t data){
-  
+void static wbuf_write_uint32_t(struct wbuf* wb, uint32_t data){
+  *((std::uint32_t *) wb->buf + wb->offset) = data;
+  wb->offset = wb->offset + 4;
+}
+
+void static wbuf_write_charStar(struct wbuf* wb, char* data, uint32_t numToWrite){
+  assert(data[numToWrite] == '\0');
+  for(int i = 0; i < numToWrite; i++) {
+    *((char **) wb->buf + wb->offset) = data;
+    wb->offset = wb->offset + 1;
+  }
+}
+
+void static wbuf_write_bitSet(struct wbuf* wb, bitset<BITSET_SIZE> data){
+  bitset<BITSET_SIZE> mask (0xFF);
+  for(int i = 0; i < BITSET_SIZE/8; i++) {
+    bitset<1024> newByte = data & mask;
+    std::uint8_t w = 0b00000000;
+    
+    for (int k = 0; k < 8; k++){
+      if (newByte[k] == 1){
+	w &= (0b1 << k); 
+      }
+    }
+      
+    *((std::uint8_t *) wb->buf + wb->offset) = w;
+    wb->offset = wb->offset + 1;
+    data >> 8;
+  }
 }
 
 /*
  * Serialize the BloomFilter (put it onto disk) in the following format
- * [Version #][user_provided bits (m, 1st arg)][# of hash fxns (k, 2nd arg)][# consumers (3rd arg)][# tasks (4th arg)][# of locks]
+ * [Version #][user_provided bits (m, 1st arg)][# of hash fxns (k, 2nd arg)][# of locks]
  * [total bits stored][bits per bitset][number of bitsets][bitset 1]...[bitset n]
  *
- * [6 bytes][4 bytes][4 bytes][4 bytes][4 bytes][4 bytes]
+ * [6 bytes][4 bytes][4 bytes][4 bytes]
  * [4 bytes][4 bytes][4 bytes][BITSET_SIZE/8 bytes]...[BITSET_SIZE/8 bytes]
  */
 template <typename T>
@@ -102,6 +129,18 @@ void BloomFilter<T>::serialize(){
   s += (BITSET_SIZE/8)*this->bit_arr_size;
   
   wbuf wb = {buffer, off, s};
+
+  wbuf_write_charStar(&wb, "v1bf", 4);
+  wbuf_write_uint32_t(&wb, m);
+  wbuf_write_uint32_t(&wb, k);
+  wbuf_write_uint32_t(&wb, bit_arr_size);
+  wbuf_write_uint32_t(&wb, bit_arr_size * BITSET_SIZE);
+  wbuf_write_uint32_t(&wb, BITSET_SIZE);
+  wbuf_write_uint32_t(&wb, bit_arr_size);
+  for(int i = 0; i < bit_arr_size; i++) {
+    wbuf_write_bitSet(&wb, bit_arr[i]);
+  }
+  
   
   cout << "test" << "\n";
 }
