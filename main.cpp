@@ -34,6 +34,11 @@ tuple<string, TYPE> get(){
     count -= 1;
     return ret;
   }
+  else{
+    string empty = "empty";
+    tuple<string, TYPE> tuple = make_tuple(empty, -1);
+    return tuple;
+  }
 }
 
 /*
@@ -66,7 +71,7 @@ void* producer(void* param){
     assert(rc == 0);
     cout << pthread_self() << ": Locked producer" << "\n";    
     while (count == MAX-1){
-      cout << pthread_self() << " :producer asleep" << "\n";
+      cout << pthread_self() << ":count " << count << " :producer asleep" << "\n";
       producer_done = true;
       pthread_cond_wait(&empty, &mutex);
     }
@@ -108,20 +113,19 @@ void* consumer(void* param){
       cout << pthread_self() << " :consumer asleep" << "\n";
       pthread_cond_wait(&filled, &mutex);
     }
-    if (count > 0){
-      std::tie (action, item) = get();
+    std::tie (action, item) = get();
 
-      //Insert item into BloomFilter
-      if (action.compare("R") == 0) {
-	td->bf->query(item);
-      } else if (action.compare("W") == 0) {
-	td->bf->insert(item);
-      }
+    //Insert item into BloomFilter
+    if (action.compare("R") == 0) {
+      td->bf->query(item);
+    } else if (action.compare("W") == 0) {
+      td->bf->insert(item);
     }
+    
     rc = pthread_cond_signal(&empty);
     assert(rc == 0);
-    cout << pthread_self() << " " << count << " :consumer" << "\n";
-    
+    cout << pthread_self() << ": " << count << " :consumer" << "\n";
+ 
     cout << pthread_self() << ": About to unlock consumer" << "\n";
     rc = pthread_mutex_unlock(&mutex);
     assert(rc == 0);

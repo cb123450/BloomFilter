@@ -91,7 +91,7 @@ void static wbuf_write_uint32_t(struct wbuf* wb, uint32_t data){
 void static wbuf_write_charStar(struct wbuf* wb, char* data, uint32_t numToWrite){
   assert(data[numToWrite] == '\0');
   for(int i = 0; i < numToWrite; i++) {
-    *((char **) wb->buf + wb->offset) = data;
+    *((char *) wb->buf + wb->offset) = data[i];
     wb->offset = wb->offset + 1;
   }
 }
