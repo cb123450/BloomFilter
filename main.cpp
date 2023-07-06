@@ -108,7 +108,7 @@ void* consumer(void* param){
       cout << pthread_self() << " :consumer asleep" << "\n";
       pthread_cond_wait(&filled, &mutex);
     }
-    //if (count > 0){
+    if (count > 0){
       std::tie (action, item) = get();
 
       //Insert item into BloomFilter
@@ -117,15 +117,16 @@ void* consumer(void* param){
       } else if (action.compare("W") == 0) {
 	td->bf->insert(item);
       }
-      rc = pthread_cond_signal(&empty);
-      assert(rc == 0);
-      cout << pthread_self() << " " << count << " :consumer" << "\n";
+    }
+    rc = pthread_cond_signal(&empty);
+    assert(rc == 0);
+    cout << pthread_self() << " " << count << " :consumer" << "\n";
+    
+    cout << pthread_self() << ": About to unlock consumer" << "\n";
+    rc = pthread_mutex_unlock(&mutex);
+    assert(rc == 0);
+    //    cout << pthread_self() << ": Unlocked consumer" << "\n";
 
-      cout << pthread_self() << ": About to unlock consumer" << "\n";
-      rc = pthread_mutex_unlock(&mutex);
-      assert(rc == 0);
-      //    cout << pthread_self() << ": Unlocked consumer" << "\n";
-      //    }
   }
   return 0;
 }
@@ -197,8 +198,6 @@ int main(int argc, char* argv[]){
   BloomFilter<TYPE> c(LENGTH, NUM_HASH_FXNS, _hash);
   thread_data<TYPE> td = {&c, NUM_TASKS};
 
-  c.serialize();
-  /* PRODUCER CONSUMER TESTS
   pthread_t prod;
   pthread_create(&prod, NULL, producer, &td);
   
@@ -213,7 +212,7 @@ int main(int argc, char* argv[]){
   pthread_join(prod, NULL);
     
   cout << "Done" << "\n";
-  */
+  c.serialize();
   
   return 0;
   

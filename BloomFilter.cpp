@@ -1,6 +1,8 @@
 #include "BloomFilter.h"
 #include "assert.h"
-
+#include <fcntl.h>
+#include <unistd.h>
+#include <semaphore.h>
 
 struct wbuf {
   char* buf;
@@ -122,7 +124,7 @@ void static wbuf_write_bitSet(struct wbuf* wb, bitset<BITSET_SIZE> data){
  */
 template <typename T>
 void BloomFilter<T>::serialize(){
-  
+
   char* buffer;
   std::uint32_t off = 0;
   std::uint32_t s = 32;
@@ -141,6 +143,8 @@ void BloomFilter<T>::serialize(){
     wbuf_write_bitSet(&wb, bit_arr[i]);
   }
   
+  int fd = open("file", O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
+  write(fd, wb.buf, wb.size);
   
   cout << "test" << "\n";
 }
