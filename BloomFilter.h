@@ -35,3 +35,10 @@ class BloomFilter{
 
   int bits_user_asked_for();
 };
+
+
+struct wbuf {
+    char* buf;
+    uint32  size;
+    uint32 offset;
+};
