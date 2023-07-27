@@ -1,4 +1,4 @@
-cscope 15 $HOME/BloomFilter               0000086754
+cscope 15 $HOME/BloomFilter               0000086677
 	@BloomFilter.cpp
 
 1 
@@ -673,6 +673,7 @@ tÙ®_b™s_®loÿ‹d
 b™s_u£r_asked_fÜ
 ();
 
+<<<<<<< HEAD
 40 
 	swbuf
  {
@@ -693,6 +694,8 @@ ušt32
 	moff£t
 ;
 
+=======
+>>>>>>> fa0fc2b23e42f1ece2ddb1efa2b9fbaa6d18ad0d
 	@CountingBloomFilter.cpp
 
 1 
