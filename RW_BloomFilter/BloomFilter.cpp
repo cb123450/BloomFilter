@@ -77,12 +77,12 @@ bool BloomFilter<T>::query(T obj){
   return true;
 }
 
-void static wbuf_write_uint32_t(struct wbuf* wb, uint32_t* data){
-  *((std::uint32_t *) wb->buf + (std::uint32_t *) wb->offset) = data;
+void static wbuf_write_uint32_t(struct wbuf* wb, uint32_t data){
+  *((std::uint32_t *) wb->buf +  wb->offset) = data;
   wb->offset = wb->offset + 4;
 }
 
-void static wbuf_write_charStar(struct wbuf* wb, char* data, uint32_t* numToWrite){
+void static wbuf_write_charStar(struct wbuf* wb, char* data, uint32_t numToWrite){
   assert(data[numToWrite] == '\0');
   for(std::uint32_t i = 0; i < numToWrite; i++) {
     *((char *) wb->buf + wb->offset) = data[i];
@@ -119,12 +119,12 @@ void static wbuf_write_bitSet(struct wbuf* wb, bitset<BITSET_SIZE> data){
 template <typename T>
 void BloomFilter<T>::serialize(){
 
-  char** buffer = {};
+  char* buffer = {};
   std::uint32_t off = 0;
   std::uint32_t s = 32;
   s += (BITSET_SIZE/8)*this->bit_arr_size;
   
-  wbuf wb = {&buffer, &off, &s};
+  wbuf wb = {&buffer, off, s};
 
   wbuf_write_charStar(&wb, "v1bf", 4);
   wbuf_write_uint32_t(&wb, m);
