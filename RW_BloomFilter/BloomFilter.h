@@ -43,6 +43,6 @@ class BloomFilter{
 
 struct wbuf {
     char** buf;
-    uint32_t* offset;
-    uint32_t*  size;
+    uint32_t offset;
+    uint32_t  size;
 };
