@@ -1,4 +1,4 @@
-# BloomFilter
+# Bloom Filter
 **C++ implementation of a Bloom Filter.**
 
 * A Bloom Filter is a space efficient data structure that can be used to test if an object is in a set. It can give false positives, but it will not give false negatives. It is used to reduce the amount of searches to memory for objects that are not there.
